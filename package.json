@@ -1,0 +1,17 @@
+{
+    "private": true,
+    "workspaces": [
+        "atlasstudio-backend",
+        "atlasstudio-frontend"
+    ],
+    "scripts": {
+        "start": "concurrently -n API,FRONT \"cd atlasstudio-backend && mvnw.cmd spring-boot:run\" \"yarn workspace atlasstudio-frontend dev\"",
+        "test": "yarn workspace atlasstudio-frontend test"
+    },
+    
+    "devDependencies": {
+        "component-crafter": "^2.0.17",
+        "concurrently": "^9.2.0",
+        "madge": "^8.0.0"
+    }
+}

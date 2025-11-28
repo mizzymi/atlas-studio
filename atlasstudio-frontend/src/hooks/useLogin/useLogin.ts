@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
+import { useCheckSession } from "@/hooks/useCheckSession/useCheckSession";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -78,7 +79,7 @@ interface UseLoginPageReturn {
  * you must document it and type it correctly for the usability
  * of the custom hook.
  */
-interface UseLoginPageProps {}
+interface UseLoginPageProps { }
 
 /**
  * **DESCRIPTION:**
@@ -86,9 +87,8 @@ interface UseLoginPageProps {}
  * The `useLoginPage` hook encapsulates all logic needed for the
  * Login page:
  *
- * - On mount, it calls `/api/me` to check if there is an active session.
- *   - If an authenticated user is found, it redirects to `/WebCreator`.
- *   - Otherwise, it allows the Login page to render.
+ * - It uses `useCheckSession` to call `/api/me` and, if a session
+ *   exists, redirects to `/WebCreator`.
  * - It manages the state of the login form (`email`, `password`).
  * - It exposes handlers to:
  *   - Trigger Google OAuth login.
@@ -118,44 +118,19 @@ interface UseLoginPageProps {}
  *   handleLocalLogin,
  * } = useLoginPage({});
  */
-export const useLoginPage = ({}: UseLoginPageProps): UseLoginPageReturn => {
+export const useLoginPage = ({ }: UseLoginPageProps): UseLoginPageReturn => {
   const router = useRouter();
 
+  const { checkingSession } = useCheckSession({
+    redirectAuthenticatedTo: "/WebCreator",
+  });
+
   const [loadingGoogle, setLoadingGoogle] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
   const [localLoading, setLocalLoading] = useState(false);
-
-  // Session check on mount
-  useEffect(() => {
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL is not defined");
-      setCheckingSession(false);
-      return;
-    }
-
-    const checkSession = async () => {
-      try {
-        const res = await fetch(`${backendUrl}/api/me`, {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          router.replace("/WebCreator");
-        } else {
-          setCheckingSession(false);
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        setCheckingSession(false);
-      }
-    };
-
-    checkSession();
-  }, [router, backendUrl]);
 
   const handleGoogleLogin = () => {
     if (!backendUrl) {

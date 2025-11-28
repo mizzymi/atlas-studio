@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
+import { useCheckSession } from "@/hooks/useCheckSession/useCheckSession";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -104,7 +105,7 @@ interface UseRegisterPageReturn {
  * you must document it and type it correctly for the usability
  * of the custom hook.
  */
-interface UseRegisterPageProps {}
+interface UseRegisterPageProps { }
 
 /**
  * **DESCRIPTION:**
@@ -112,9 +113,8 @@ interface UseRegisterPageProps {}
  * The `useRegisterPage` hook encapsulates all logic needed for the
  * Register page:
  *
- * - On mount, it calls `/api/me` to check if there is an active session.
- *   - If an authenticated user is found, it redirects to `/WebCreator`.
- *   - Otherwise, it allows the Register page to render.
+ * - It uses `useCheckSession` to call `/api/me` and, if a session
+ *   exists, redirects to `/WebCreator`.
  * - It manages the state of the registration form (`name`, `email`,
  *   `password`, `confirmPassword`).
  * - It validates that both password fields match.
@@ -152,45 +152,20 @@ interface UseRegisterPageProps {}
  *   handleRegister,
  * } = useRegisterPage({});
  */
-export const useRegisterPage = ({}: UseRegisterPageProps): UseRegisterPageReturn => {
+export const useRegisterPage = ({ }: UseRegisterPageProps): UseRegisterPageReturn => {
   const router = useRouter();
+
+  const { checkingSession } = useCheckSession({
+    redirectAuthenticatedTo: "/WebCreator",
+  });
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [checkingSession, setCheckingSession] = useState(true);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Session check on mount
-  useEffect(() => {
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL is not defined");
-      setCheckingSession(false);
-      return;
-    }
-
-    const checkSession = async () => {
-      try {
-        const res = await fetch(`${backendUrl}/api/me`, {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          router.replace("/WebCreator");
-        } else {
-          setCheckingSession(false);
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        setCheckingSession(false);
-      }
-    };
-
-    checkSession();
-  }, [router]);
 
   const handleGoogleRegister = () => {
     if (!backendUrl) {

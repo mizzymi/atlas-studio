@@ -4,6 +4,9 @@ import type { FC } from "react";
 import Image from "next/image";
 import { GoogleLoginButton } from "@/components/GoogleLoginButton/GoogleLoginButton";
 import { useLoginPage } from "@/hooks/useLogin/useLogin";
+import { OrSeparator } from "@/components/OrSeparator/OrSeparator";
+import { LoginTitle } from "@/components/LoginTitle/LoginTitle";
+import { AuthInput } from "@/components/AuthInput/AuthInput";
 
 /**
  * **DESCRIPTION:**
@@ -80,14 +83,7 @@ const LoginPage: FC = () => {
       >
         <div className="w-full max-w-sm rounded-2xl px-6 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.85)]">
           {/* Title + subtitle centered */}
-          <h1 className="text-center text-3xl font-extrabold tracking-tight mb-2">
-            Login to Your
-            <br />
-            Account
-          </h1>
-          <p className="text-center text-sm text-gray-400 mb-7">
-            Create and share your Web.
-          </p>
+          <LoginTitle title={"Login to"} label={"Create your own WebSites"} />
 
           {/* Google Button */}
           <div className="mb-5">
@@ -98,49 +94,25 @@ const LoginPage: FC = () => {
             />
           </div>
 
-          {/* OR separator */}
-          <div className="mb-5 flex items-center gap-3 text-[11px] text-gray-500">
-            <span className="h-px flex-1 bg-white/10" />
-            <span className="uppercase tracking-[0.2em]">or</span>
-            <span className="h-px flex-1 bg-white/10" />
-          </div>
+          {/* Or Separator */}
+          <OrSeparator />
 
           {/* Local login */}
           <form onSubmit={handleLocalLogin} className="space-y-3">
-            <input
+            <AuthInput
               type="email"
               placeholder="UserName"
-              className="
-                w-full rounded-lg
-                bg-[#202227]
-                border border-transparent
-                px-3 py-2.5 text-sm
-                text-white
-                placeholder:text-gray-500
-                outline-none
-                focus:border-sky-500
-              "
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              onChange={setEmail}
+              autoComplete="email"
             />
 
-            <input
+            <AuthInput
               type="password"
               placeholder="Password"
-              className="
-                w-full rounded-lg
-                bg-[#202227]
-                border border-transparent
-                px-3 py-2.5 text-sm
-                text-white
-                placeholder:text-gray-500
-                outline-none
-                focus:border-sky-500
-              "
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              onChange={setPassword}
+              autoComplete="current-password"
             />
 
             {/* Forgot password aligned right */}
@@ -194,7 +166,6 @@ const LoginPage: FC = () => {
           priority
           className="object-cover"
         />
-        {/* Degradado suave si quieres oscurecer un poco la parte izquierda de la foto */}
         <div className="absolute inset-0 bg-gradient-to-l from-black/40 via-black/10 to-transparent" />
       </aside>
     </main>

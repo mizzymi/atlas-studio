@@ -58,5 +58,5 @@ export const useCheckSession = ({
     }
   }, [isAuthenticated, redirectAuthenticatedTo, router]);
 
-  return { checkingSession };
+  return { checkingSession: false };
 };

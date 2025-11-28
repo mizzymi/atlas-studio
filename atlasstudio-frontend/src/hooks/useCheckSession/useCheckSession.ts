@@ -1,40 +1,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+import { useEffect } from "react";
+import { useAppStore } from "@/store/AppStore";
 
 /**
  * **DESCRIPTION:**
- * 
- * With this interface we can represent the return of the
- * custom hook `useCheckSession`. This hook centralizes
- * the logic used to check if there is already an authenticated
- * user session in the backend.
- * 
- * It is shared by different auth flows (Login, Register, etc.)
- * to avoid duplicating the `/api/me` check in each hook.
+ *
+ * Return type for `useCheckSession`. Since we no longer perform
+ * any HTTP request here, `checkingSession` will usually be `false`
+ * unless you decide to drive it from the reducer manually.
  */
 interface UseCheckSessionReturn {
   /**
-   * Indicates whether the session checking request (`/api/me`)
-   * is still in progress.
+   * Indicates whether a session check is in progress, as seen
+   * from the Auth reducer. In this simplified version it will
+   * normally be `false`.
    */
   checkingSession: boolean;
 }
 
 /**
  * **DESCRIPTION:**
- * 
- * This interface defines the props accepted by `useCheckSession`.
- * 
- * - `redirectAuthenticatedTo` (optional): If provided and an
- *   authenticated user is detected, the hook will immediately
- *   redirect to this path using `router.replace`.
- * 
- * If you add new properties, you must document them and type them
- * correctly for the usability of the custom hook.
+ *
+ * Hook props:
+ * - `redirectAuthenticatedTo` (optional): if provided and the
+ *   user is already authenticated (`isAuthenticated === true`),
+ *   the hook will immediately perform `router.replace` to that
+ *   path.
  */
 interface UseCheckSessionProps {
   redirectAuthenticatedTo?: string;
@@ -42,64 +35,28 @@ interface UseCheckSessionProps {
 
 /**
  * **DESCRIPTION:**
- * 
- * The `useCheckSession` hook encapsulates the logic to check
- * whether there is an active authenticated session.
- * 
- * - It calls `/api/me` on mount with `credentials: "include"`.
- * - If the response is `ok` and `redirectAuthenticatedTo` is
- *   provided, it performs a `router.replace` to that route.
- * - If there is no valid session (non-OK response or error),
- *   it simply exposes `checkingSession = false` so the
- *   calling component can render the auth page.
- * 
- * **RETURNS:**
- * 
- * @returns an object with:
- * - `checkingSession`: boolean flag indicating whether the
- *   session check is still running.
- * 
- * **EXAMPLE OF USE:**
- * 
- * @example
- * const { checkingSession } = useCheckSession({
- *   redirectAuthenticatedTo: "/WebCreator",
- * });
+ *
+ * `useCheckSession` NOW:
+ *
+ * - Does NOT perform ANY `fetch` calls.
+ * - Does NOT dispatch auth check actions.
+ * - Simply reads `isAuthenticated` (and `checkingSession`) from
+ *   the Auth slice of the global AppStore.
+ * - If `isAuthenticated` is true and `redirectAuthenticatedTo`
+ *   is provided, it redirects.
  */
 export const useCheckSession = ({
   redirectAuthenticatedTo,
 }: UseCheckSessionProps): UseCheckSessionReturn => {
   const router = useRouter();
-  const [checkingSession, setCheckingSession] = useState(true);
+  const { state } = useAppStore();
+  const { checkingSession, isAuthenticated } = state.auth;
 
   useEffect(() => {
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL is not defined");
-      setCheckingSession(false);
-      return;
+    if (isAuthenticated && redirectAuthenticatedTo) {
+      router.replace(redirectAuthenticatedTo);
     }
-
-    const checkSession = async () => {
-      try {
-        const res = await fetch(`${backendUrl}/api/me`, {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          if (redirectAuthenticatedTo) {
-            router.replace(redirectAuthenticatedTo);
-          }
-        } else {
-          setCheckingSession(false);
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        setCheckingSession(false);
-      }
-    };
-
-    checkSession();
-  }, [router, redirectAuthenticatedTo]);
+  }, [isAuthenticated, redirectAuthenticatedTo, router]);
 
   return { checkingSession };
 };

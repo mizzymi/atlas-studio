@@ -87,38 +87,14 @@ interface UseLoginPageProps { }
  * The `useLoginPage` hook encapsulates all logic needed for the
  * Login page:
  *
- * - It uses `useCheckSession` to call `/api/me` and, if a session
- *   exists, redirects to `/WebCreator`.
+ * - It uses `useCheckSession` (AppStore-based) to call `/api/me`
+ *   and, if a session exists, redirects to `/WebCreator`.
  * - It manages the state of the login form (`email`, `password`).
  * - It exposes handlers to:
  *   - Trigger Google OAuth login.
  *   - Submit the local login form to `/api/auth/login`.
- *
- * **RETURNS:**
- *
- * @returns returns an object with the properties of:
- * - `loadingGoogle`, `checkingSession`
- * - `email`, `password`, `localError`, `localLoading`
- * - `setEmail`, `setPassword`
- * - `handleGoogleLogin`, `handleLocalLogin`
- *
- * **EXAMPLE OF USE:**
- *
- * @example
- * const {
- *   loadingGoogle,
- *   checkingSession,
- *   email,
- *   password,
- *   localError,
- *   localLoading,
- *   setEmail,
- *   setPassword,
- *   handleGoogleLogin,
- *   handleLocalLogin,
- * } = useLoginPage({});
  */
-export const useLoginPage = ({ }: UseLoginPageProps): UseLoginPageReturn => {
+export const useLoginPage = ({}: UseLoginPageProps): UseLoginPageReturn => {
   const router = useRouter();
 
   const { checkingSession } = useCheckSession({

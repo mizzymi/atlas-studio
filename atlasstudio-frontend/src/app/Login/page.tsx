@@ -1,12 +1,15 @@
 "use client";
 
-import type { FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import Image from "next/image";
 import { GoogleLoginButton } from "@/components/GoogleLoginButton/GoogleLoginButton";
 import { useLoginPage } from "@/hooks/useLogin/useLogin";
 import { OrSeparator } from "@/components/OrSeparator/OrSeparator";
 import { LoginTitle } from "@/components/LoginTitle/LoginTitle";
 import { AuthInput } from "@/components/AuthInput/AuthInput";
+import { useChangeTheme } from "@/hooks/useChangeTheme/useChangeTheme";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import Link from "next/link";
 
 /**
  * **DESCRIPTION:**
@@ -47,11 +50,68 @@ const LoginPage: FC = () => {
     handleLocalLogin,
   } = useLoginPage({});
 
+  const { resolvedTheme } = useChangeTheme({});
+  const isDarkMode = resolvedTheme === "dark";
+
+  const checkingMainClasses = `
+    min-h-screen
+    flex
+    items-center
+    justify-center
+    px-4
+    transition-colors
+    duration-300
+    ${isDarkMode ? "bg-[#050509] text-white" : ""}
+  `;
+
+  const mainClasses = `
+    min-h-screen
+    flex
+    flex-col
+    lg:flex-row
+    transition-colors
+    duration-300
+    ${isDarkMode ? "bg-[#050509] text-white" : ""}
+  `;
+
+  const cardClasses = `
+    w-full
+    max-w-sm
+    rounded-2xl
+    px-6
+    py-8
+    shadow-[0_24px_60px_rgba(0,0,0,0.85)]
+    border
+    border-transparent
+    transition-colors
+    duration-300
+  `;
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  if (!hasMounted) {
+    return null;
+  }
+
   if (checkingSession) {
     return (
       <main
         data-testid="Login-Page"
-        className="min-h-screen flex items-center justify-center bg-[#050509] text-white px-4"
+        className={checkingMainClasses}
+        style={
+          !isDarkMode
+            ? {
+              backgroundColor: "var(--background)",
+              color: "var(--foreground)",
+            }
+            : {
+              backgroundColor: "var(--foreground)",
+              color: "var(--background)",
+            }
+        }
       >
         <p>Comprobando sesión...</p>
       </main>
@@ -61,15 +121,31 @@ const LoginPage: FC = () => {
   return (
     <main
       data-testid="Login-Page"
-      className="
-        min-h-screen
-        bg-[#050509]
-        text-white
-        flex
-        flex-col
-        lg:flex-row
-      "
+      className={mainClasses}
+      style={
+        !isDarkMode
+          ? {
+            backgroundColor: "var(--background)",
+            color: "var(--foreground)",
+          }
+          : {
+            backgroundColor: "var(--foreground)",
+            color: "var(--background)",
+          }
+      }
     >
+      <section
+        className="
+          flex
+          items-center
+          justify-center
+          px-4
+          py-10
+        "
+      >
+        <ThemeSwitcher />
+      </section>
+
       {/* Columna izquierda: formulario */}
       <section
         className="
@@ -81,7 +157,18 @@ const LoginPage: FC = () => {
           py-10
         "
       >
-        <div className="w-full max-w-sm rounded-2xl px-6 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.85)]">
+        <div
+          className={cardClasses}
+          style={
+            !isDarkMode
+              ? {
+                backgroundColor: "var(--background)",
+                borderColor: "rgba(28, 164, 255, 0.1)",
+                boxShadow: "0 18px 45px rgba(23, 23, 23, 0.06)",
+              }
+              : undefined
+          }
+        >
           {/* Title + subtitle centered */}
           <LoginTitle title={"Login to"} label={"Create your own WebSites"} />
 
@@ -119,7 +206,11 @@ const LoginPage: FC = () => {
             <div className="flex justify-end">
               <button
                 type="button"
-                className="text-[11px] text-gray-400 hover:text-gray-200"
+                className={`
+                  text-[11px]
+                  transition-colors
+                  ${isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-800"}
+                `}
               >
                 Forgot Password?
               </button>
@@ -148,24 +239,40 @@ const LoginPage: FC = () => {
           </form>
 
           {/* Bottom text */}
-          <p className="mt-6 text-[11px] text-center text-gray-400">
+          <p
+            className={`
+              mt-6 text-[11px] text-center
+              ${isDarkMode ? "text-gray-400" : "text-gray-500"}
+            `}
+          >
             Not a member yet?{" "}
-            <a href="/Register" className="text-sky-400 underline">
+            <Link
+              href="/Register"
+              className={isDarkMode ? "text-sky-400 underline" : "text-sky-500 underline"}
+            >
               Register Now
-            </a>
+            </Link>
           </p>
         </div>
       </section>
 
       {/* Columna derecha: imagen (solo en ≥1024px) */}
       <aside className="relative hidden lg:block lg:w-1/2">
-        <Image
-          src="/images/atlas-intro-bg.jpg"
-          alt="Earth from space at night"
+        {!isDarkMode ? <Image
+          src="/images/BG-day.png"
+          alt="Atlas intro background"
           fill
           priority
           className="object-cover"
-        />
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        /> : <Image
+          src="/images/BG-night.png"
+          alt="Atlas intro background"
+          fill
+          priority
+          className="object-cover"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />}
         <div className="absolute inset-0 bg-gradient-to-l from-black/40 via-black/10 to-transparent" />
       </aside>
     </main>

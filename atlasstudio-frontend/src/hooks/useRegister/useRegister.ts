@@ -111,48 +111,19 @@ interface UseRegisterPageProps { }
  * **DESCRIPTION:**
  *
  * The `useRegisterPage` hook encapsulates all logic needed for the
- * Register page:
+ * Register page using the AppStore-based `useCheckSession`:
  *
- * - It uses `useCheckSession` to call `/api/me` and, if a session
- *   exists, redirects to `/WebCreator`.
- * - It manages the state of the registration form (`name`, `email`,
- *   `password`, `confirmPassword`).
+ * - On mount, it checks `/api/me` and redirects to `/WebCreator`
+ *   if there is an active session.
+ * - It manages the state of the registration form.
  * - It validates that both password fields match.
  * - It exposes handlers to:
  *   - Trigger Google OAuth registration.
  *   - Submit the local registration form to `/api/auth/register`.
- *
- * **RETURNS:**
- *
- * @returns returns an object with the properties of:
- * - `name`, `email`, `password`, `confirmPassword`
- * - `checkingSession`, `loadingGoogle`, `error`, `loading`
- * - `passwordsMismatch`
- * - `setName`, `setEmail`, `setPassword`, `setConfirmPassword`
- * - `handleGoogleRegister`, `handleRegister`
- *
- * **EXAMPLE OF USE:**
- *
- * @example
- * const {
- *   name,
- *   email,
- *   password,
- *   confirmPassword,
- *   checkingSession,
- *   loadingGoogle,
- *   error,
- *   loading,
- *   passwordsMismatch,
- *   setName,
- *   setEmail,
- *   setPassword,
- *   setConfirmPassword,
- *   handleGoogleRegister,
- *   handleRegister,
- * } = useRegisterPage({});
  */
-export const useRegisterPage = ({ }: UseRegisterPageProps): UseRegisterPageReturn => {
+export const useRegisterPage = (
+  {}: UseRegisterPageProps
+): UseRegisterPageReturn => {
   const router = useRouter();
 
   const { checkingSession } = useCheckSession({

@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useChangeTheme } from "@/hooks/useChangeTheme/useChangeTheme";
 
 /**
  * **PROPERTIES OF APP COMPONENT:**
@@ -35,6 +36,10 @@ interface AuthInputProps {
  * It encapsulates a styled text field with a consistent visual appearance
  * across login, registration and other auth-related pages.
  *
+ * The component is theme-aware: it reads the current theme from the
+ * `useChangeTheme` hook and adapts its colors for light/dark modes
+ * using your design tokens (`--background`, `--foreground`, accent blues).
+ *
  * The value is fully controlled by the parent component through the `value`
  * and `onChange` props, keeping business logic and state management outside
  * of this presentational component.
@@ -59,21 +64,51 @@ export const AuthInput: FC<AuthInputProps> = ({
   autoComplete,
   required = true,
 }) => {
+  const { resolvedTheme } = useChangeTheme({});
+  const isDarkMode = resolvedTheme === "dark";
+
+  const baseClasses = `
+    w-full
+    rounded-lg
+    px-3
+    py-2.5
+    text-sm
+    outline-none
+    border
+    transition-colors
+    duration-200
+  `;
+
+  const themeClasses = isDarkMode
+    ? `
+        bg-[#202227]
+        border-transparent
+        text-white
+        placeholder:text-gray-500
+        focus:border-sky-500
+      `
+    : `
+        bg-[rgba(15,23,42,0.03)]
+        border-[rgba(148,163,184,0.6)]
+        text-[var(--foreground)]
+        placeholder:text-gray-400
+        focus:border-[rgba(28,164,255,0.9)]
+      `;
+
   return (
     <input
       type={type}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      className="
-        w-full rounded-lg
-        bg-[#202227]
-        border border-transparent
-        px-3 py-2.5 text-sm
-        text-white
-        placeholder:text-gray-500
-        outline-none
-        focus:border-sky-500
-      "
+      className={`${baseClasses} ${themeClasses}`}
+      style={
+        !isDarkMode
+          ? {
+              backgroundColor: "rgba(255,255,255,0.95)",
+              color: "var(--foreground)",
+            }
+          : undefined
+      }
       value={value}
       onChange={(e) => onChange(e.target.value)}
       required={required}

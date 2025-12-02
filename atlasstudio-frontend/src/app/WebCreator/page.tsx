@@ -1,8 +1,10 @@
 "use client";
 
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { useWebCreatorPage } from "@/hooks/useWebCreator/useWebCreator";
 import { useChangeTheme } from "@/hooks/useChangeTheme/useChangeTheme";
+import { Header } from "@/components/Header/Header";
+import router from "next/router";
 
 /**
  * **DESCRIPTION:**
@@ -32,6 +34,12 @@ const WebCreatorPage: FC = () => {
   const { resolvedTheme } = useChangeTheme({});
   const isDarkMode = resolvedTheme === "dark";
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/");
+    }
+  }, [loading, user, router]);
+  
   if (loading) {
     return (
       <main
@@ -62,10 +70,6 @@ const WebCreatorPage: FC = () => {
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <main
       data-testid="WebCreator-Page"
@@ -87,32 +91,7 @@ const WebCreatorPage: FC = () => {
           }
       }
     >
-      <header
-        className={`
-          p-6
-          border-b
-          transition-colors
-          duration-300
-          ${isDarkMode ? "border-white/10" : ""}
-        `}
-        style={
-          !isDarkMode
-            ? {
-              borderBottomColor: "rgba(28, 164, 255, 0.1)",
-            }
-            : undefined
-        }
-      >
-        <h1 className="text-xl font-semibold">Atlas Studio Web Creator</h1>
-        <p
-          className={`
-            text-sm
-            ${isDarkMode ? "text-gray-400" : "text-gray-500"}
-          `}
-        >
-          Bienvenido, {user.name ?? user.email}
-        </p>
-      </header>
+      <Header />
 
       <section className="p-6">
         Entry Point for WebCreator page. Good Luck!
